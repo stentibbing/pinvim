@@ -1,6 +1,7 @@
-local Ui = require("pin.ui")
-local Buffer = require("pin.buffer")
-local Pin = require("pin.pin")
+local Ui = require("pinvim.ui")
+local Buffer = require("pinvim.buffer")
+local List = require("pinvim.list")
+local Commands = require("pinvim.cmds")
 
 local M = {}
 
@@ -10,18 +11,19 @@ M.state = {
 	config = {
 		relative = "editor",
 		border = "rounded",
-		title = " Pin ",
 		style = "minimal",
-		title_pos = "center",
 	},
 	pins = {},
 }
 
--- TODO: user passed config
+-- TODO:
+-- user passed config
+-- run autocommand on buf exit, reasign new buffer to state once created
 M.setup = function()
 	Buffer.create(M.state)
+	Commands.setup(M.state)
 
-	vim.api.nvim_create_user_command("Pin", function(opts)
+	vim.api.nvim_create_user_command("Pinvim", function(opts)
 		local args = opts.fargs
 		if #args == 0 then
 			Ui.toggle_window(M.state)
@@ -38,23 +40,25 @@ M.setup = function()
 			return
 		elseif args[1] == "add" then
 			local buf_info = Buffer.info()
-			Pin.add(M.state, buf_info)
+			if buf_info.path == "" then
+				print("No file to pin")
+				return
+			end
+			List.add(M.state, buf_info)
 			return
 		elseif args[1] == "select" then
-			local buffer = Pin.get_buffer(M.state, tonumber(args[2]) + 1)
-
-			print("buffer: " .. vim.inspect(buffer))
+			local buffer = List.get_buffer(M.state, tonumber(args[2]) + 1)
 
 			if buffer then
-				vim.cmd("Pin close")
+				vim.cmd("Pinvim close")
 				Buffer.set_cur(buffer)
 				return
 			end
 
-			local path = Pin.get_path(M.state, tonumber(args[2]))
+			local path = List.get_path(M.state, tonumber(args[2]) + 1)
 
 			if path then
-				vim.cmd("Pin close")
+				vim.cmd("Pinvim close")
 				vim.cmd("edit " .. path)
 				return
 			end
@@ -62,7 +66,7 @@ M.setup = function()
 	end, { nargs = "*" })
 
 	vim.keymap.set("n", "<C-e>", function()
-		vim.cmd("Pin toggle")
+		vim.cmd("Pinvim toggle")
 	end, { remap = true })
 
 	vim.keymap.set("n", "<Esc>", function()
@@ -70,11 +74,11 @@ M.setup = function()
 	end, { buffer = M.state.buffer, remap = false })
 
 	vim.keymap.set("n", "<C-a>", function()
-		vim.cmd("Pin add")
+		vim.cmd("Pinvim add")
 	end, {})
 
 	vim.keymap.set("n", "<CR>", function()
-		vim.cmd("Pin select " .. vim.api.nvim_win_get_cursor(M.state.window)[1] - 1)
+		vim.cmd("Pinvim select " .. vim.api.nvim_win_get_cursor(M.state.window)[1] - 1)
 	end, { buffer = M.state.buffer, remap = false })
 end
 

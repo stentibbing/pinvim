@@ -1,3 +1,5 @@
+local Buffer = require("pinvim.buffer")
+
 local M = {}
 local clipboard = nil
 
@@ -41,6 +43,24 @@ M.get_path = function(state, idx)
 		return nil
 	end
 	return state.pins[idx].path
+end
+
+M.clear_buffer = function(state, buf)
+	for i = 1, #state.pins do
+		if state.pins[i].buffer == buf then
+			state.pins[i].buffer = nil
+		end
+	end
+end
+
+M.add_buffer = function(state, buf)
+	local buffer_info = Buffer.info()
+	for i = 1, #state.pins do
+		if state.pins[i].path == buffer_info.path then
+			state.pins[i].buffer = buf
+			return
+		end
+	end
 end
 
 return M

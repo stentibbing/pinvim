@@ -1,8 +1,8 @@
 local DevIcons = require("nvim-web-devicons")
-local Buffer = require("pin.buffer")
+local Buffer = require("pinvim.buffer")
 
 local M = {}
-M.ns_id = vim.api.nvim_create_namespace("pin.nvim")
+M.ns_id = vim.api.nvim_create_namespace("pinvim")
 
 M.update_window_params = function(state)
 	state.config.width = math.floor(vim.o.columns * 0.3)
@@ -78,7 +78,7 @@ M.render_buffer = function(state)
 
 		local fn_len = string.len(fn)
 		local dir_len = string.len(dir)
-		local max_len = state.config.width - 7
+		local max_len = state.config.width - 9
 		local max_dir_len = max_len - fn_len - pad
 
 		if fn_len >= max_len then
@@ -99,6 +99,8 @@ M.render_buffer = function(state)
 			{ icon or " ", icon_hl or "Normal" },
 			{ " ", "Normal" },
 			{ fn, "Normal" },
+			{ " ", "Normal" },
+			{ pin.buffer and " " or "󰆴", pin.buffer and "Normal" or "Error" },
 			{ string.rep(" ", pad), "Normal" },
 			{ dir, "Comment" },
 			{ " ", "Normal" },

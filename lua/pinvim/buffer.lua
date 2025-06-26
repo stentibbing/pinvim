@@ -19,7 +19,6 @@ M.set_cur = function(buffer)
 	if not M.exists(buffer) then
 		return
 	end
-
 	if vim.api.nvim_buf_is_loaded(buffer) then
 		vim.api.nvim_set_current_buf(buffer)
 	else
