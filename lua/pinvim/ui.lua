@@ -66,19 +66,21 @@ M.render_buffer = function(state)
 	vim.bo[state.buffer].modifiable = true
 	vim.bo[state.buffer].readonly = false
 
+	vim.api.nvim_buf_clear_namespace(state.buffer, M.ns_id, 0, -1)
+
 	local lines = {}
 	local extmarks = {}
 	local cur_buf = vim.api.nvim_get_current_buf()
 
-	for lnr, pin in ipairs(state.pins) do
-		local fn = pin.fn
-		local dir = pin.dir
+	for lnr, li in ipairs(state.list) do
+		local fn = li.fn
+		local dir = li.dir
 		local pad = 1
-		local icon, icon_hl = DevIcons.get_icon(pin.fn, pin.ext)
+		local icon, icon_hl = DevIcons.get_icon(li.fn, li.ext)
 
 		local fn_len = string.len(fn)
 		local dir_len = string.len(dir)
-		local max_len = state.config.width - 9
+		local max_len = state.config.width - 10
 		local max_dir_len = max_len - fn_len - pad
 
 		if fn_len >= max_len then
@@ -87,20 +89,20 @@ M.render_buffer = function(state)
 			dir = ""
 			pad = 0
 		elseif dir_len > max_dir_len then
-			dir = string.sub(dir, dir_len - max_dir_len, dir_len)
+			dir = "..." .. string.sub(dir, dir_len - max_dir_len + 3, dir_len)
 		else
 			pad = max_len - fn_len - dir_len
 		end
 
 		table.insert(extmarks, {
 			{ " ", "Normal" },
-			{ tostring(lnr), pin.buffer == cur_buf and "Constant" or "Normal" },
+			{ tostring(lnr), li.buffer == cur_buf and "Constant" or "Normal" },
 			{ " ", "Normal" },
 			{ icon or " ", icon_hl or "Normal" },
 			{ " ", "Normal" },
 			{ fn, "Normal" },
 			{ " ", "Normal" },
-			{ pin.buffer and " " or "󰆴", pin.buffer and "Normal" or "Error" },
+			{ li.buffer and " " or "󰆴", li.buffer and "Normal" or "Error" },
 			{ string.rep(" ", pad), "Normal" },
 			{ dir, "Comment" },
 			{ " ", "Normal" },
