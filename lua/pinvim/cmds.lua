@@ -1,6 +1,7 @@
 local Ui = require("pinvim.ui")
 local Buffer = require("pinvim.buffer")
 local List = require("pinvim.list")
+local Integration = require("pinvim.integration")
 
 local M = {}
 
@@ -43,7 +44,7 @@ M.setup = function(state)
 			Ui.toggle_window(state)
 			return
 		-- Add new buffer to the list
-		elseif args[1] == "add" then
+		elseif args[1] == "add_buffer" then
 			local buf_info = Buffer.info()
 			if buf_info.path == "" then
 				print("No file to pin")
@@ -78,13 +79,26 @@ M.setup = function(state)
 		-- Paste at the position of cursor
 		elseif args[1] == "paste" then
 			local index = tonumber(args[2]) + 1
-			print("index", index)
 			if not index or index < 1 or index > #state.list + 1 then
 				print("Invalid index for paste")
 				return
 			end
 			List.paste(state, index)
 			Ui.render_buffer(state)
+		-- Run integration commands
+		elseif args[1] == "integration" then
+			local name = args[2]
+			local cmd = args[3]
+			local params = args[4]
+			if not name then
+				print("Invalid integration name")
+				return
+			end
+			if not cmd then
+				print("Invalid integration command")
+				return
+			end
+			Integration.run(name, cmd, params)
 			return
 		end
 	end, { nargs = "*" })

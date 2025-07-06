@@ -10,7 +10,7 @@ M.setup = function(state)
 	end, { buffer = state.buffer, remap = false })
 
 	vim.keymap.set("n", "<C-a>", function()
-		vim.cmd("Pinvim add")
+		vim.cmd("Pinvim add_buffer")
 	end, {})
 
 	vim.keymap.set("n", "<CR>", function()
